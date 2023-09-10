@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <sys\stat.h>
+#define FILENAME "TextFileMk2.txt"
 
 ssize_t MyGetline(char **lineptr, size_t *n, FILE *stream)
 {
@@ -100,31 +102,32 @@ char *strdup(const char *str)
 int main(void)
 {
     FILE *file;
-    file = fopen("TextFileMk2.txt", "r");
+    file = fopen(FILENAME, "r");
 
     size_t nline = 0, nchar = 0, maxlen = 0;
+
+    struct stat FileData;
+    stat(FILENAME,&FileData);
+
     char ReadedChar = '0';
 
-    while (ReadedChar != EOF)
+    nchar = FileData.st_size;
+
+
+    char * Buff = (char *) calloc(nchar, sizeof(char));
+
+    fread(Buff, sizeof(char), nchar, file);
+    fclose(file);
+
+    for (int i = 0; i < nchar; i++)
     {
-        ReadedChar = getc(file);
-        nchar += 1;
-        if (ReadedChar == '\0' || ReadedChar == '\n')
+        if (Buff[i] == '\n')
         {
             nline += 1;
         }
     }
 
-    rewind(file);
-    // printf("nline is %d\nnchar is %d", nline, nchar);
-
     char ** LineArray = (char **) calloc(nline, sizeof(char*));
-
-    char * Buff = (char *) calloc(nchar + 1, sizeof(char));
-
-    fread(Buff, sizeof(char), nchar, file);
-    fclose(file);
-
     LineArray[0] = Buff;
 
     int StringNum = 1;
@@ -140,6 +143,8 @@ int main(void)
         }
     }
 
+    // printf("%d", nline);
+    // printf("%d", nchar);
 
     for (int i = 0; i < nline; i++)
     {
